@@ -13,15 +13,28 @@ import flixel.util.FlxMath;
 class PlayState extends FlxState
 {
 	/**
-	 * Function that is called up when to state is created to set it up. 
+	 * Function that is called up when to state is created to set it up.
 	 */
 	override public function create():Void
 	{
+		add(new FlxText(0, 0, 100, "play state"));
 		super.create();
 	}
-	
+
+	public function toggleSound(playing:Bool):Void
+	{
+		if (playing == false)
+		{
+			Main.sound = false;
+		}
+		if (playing == true)
+		{
+			Main.sound = true;
+		}
+	}
+
 	/**
-	 * Function that is called when this state is destroyed - you might want to 
+	 * Function that is called when this state is destroyed - you might want to
 	 * consider setting all objects this state uses to null to help garbage collection.
 	 */
 	override public function destroy():Void
@@ -35,5 +48,5 @@ class PlayState extends FlxState
 	override public function update():Void
 	{
 		super.update();
-	}	
+	}
 }

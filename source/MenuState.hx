@@ -15,7 +15,7 @@ import openfl.Assets;
 /**
  * A FlxState which can be used for the game's menu.
  */
-class MenuState extends FlxState
+class MenuState extends FlxUIState
 {
 	/**
 	 * Function that is called up when to state is created to set it up.
@@ -23,6 +23,7 @@ class MenuState extends FlxState
 	override public function create():Void
 	{
 		add(new FlxText(0, 0, 100, "title state"));
+		Main.sound = true;
 
 		if (Main.tongue == null)
 		{
@@ -32,8 +33,31 @@ class MenuState extends FlxState
 		}
 
 		_xml_id = "TitleMenu";
-		
+
 		super.create();
+	}
+
+	public override function getEvent(id:String,target:Dynamic,data:Dynamic,?params:Array<Dynamic>):Void
+	{
+		if (params != null)
+		{
+			switch(id)
+			{
+				case "click_button": //because hovering is also an event
+					FlxG.log.add("button clicked");
+					switch(cast(params[0], String))
+					{
+						case "play":
+							FlxG.log.add("play was clicked");
+							FlxG.switchState(new PlayState());
+						case "sound":
+							// toggleSound()
+						case "about":
+							// about me & game
+							// flxui popup
+					}
+			}
+		}
 	}
 
 	/**
