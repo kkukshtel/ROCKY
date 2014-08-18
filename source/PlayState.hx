@@ -1,6 +1,6 @@
 package;
 //maybe
-//import openfl.Assets;
+import openfl.Assets;
 //import flixel.plugin.MouseEventManager;
 //definitely
 import flixel.FlxG;
@@ -39,6 +39,8 @@ class PlayState extends FlxNapeState
 
 	override public function create():Void
 	{
+		super.create();
+
 		add(new FlxText(0, 0, 100, "play state"));
 
 		createWalls(0, 0,FlxG.width, FlxG.height, 30);
@@ -60,8 +62,6 @@ class PlayState extends FlxNapeState
 								"assets/CameraPole.png"
 								);
 		add(rocky);
-
-		super.create();
 	}
 
 	public function toggleSound():Void
