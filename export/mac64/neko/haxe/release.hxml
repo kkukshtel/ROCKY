@@ -13,6 +13,8 @@
 -D openfl=2.0.1
 -D flixel=3.3.5
 -D lime=1.0.1
+-cp /usr/lib/haxe/lib/nape/2,0,16/
+-D nape=2.0.16
 -cp source
 -cp /usr/lib/haxe/lib/openfl/2,0,1/backends/native
 -cp /usr/lib/haxe/lib/openfl/2,0,1/backends/native
