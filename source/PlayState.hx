@@ -24,6 +24,7 @@ import nape.callbacks.PreListener;
 import nape.constraint.DistanceJoint;
 import nape.constraint.PivotJoint;
 import nape.constraint.WeldJoint;
+import nape.constraint.AngleJoint;
 import nape.dynamics.InteractionFilter;
 import nape.dynamics.InteractionGroup;
 import nape.geom.Vec2;
@@ -36,7 +37,7 @@ class PlayState extends FlxNapeState
 	/**
 	 * Function that is called up when to state is created to set it up.
 	 */
-
+	var rocky: Ragdoll;
 	override public function create():Void
 	{
 		super.create();
@@ -44,18 +45,11 @@ class PlayState extends FlxNapeState
 		add(new FlxText(0, 0, 100, "play state"));
 
 		createWalls(0, 0,FlxG.width, FlxG.height, 30);
-		FlxNapeState.space.gravity.setxy(0, 400);
+		FlxNapeState.space.gravity.setxy(0, 800);
 		napeDebugEnabled = false;
 
-		var rocky:Ragdoll = new Ragdoll(100,250);
+		rocky = new Ragdoll(100,250);
 		rocky.init();
-		/* rocky.createGraphics("assets/GokuHead.png",
-								"assets/GokuUTorso.png",
-								"assets/GokuLTorso.png",
-								"assets/GokuUArm.png",
-								"assets/GokuLArm.png",
-								"assets/GokuULeg.png",
-								"assets/GokuLLeg.png"); */
 		rocky.createGraphics(
 								"assets/images/GokuULeg.png",
 								"assets/images/GokuLLeg.png",
@@ -69,21 +63,49 @@ class PlayState extends FlxNapeState
 			Main.sound = !Main.sound;
 	}
 
-	/**
-	 * Function that is called when this state is destroyed - you might want to
-	 * consider setting all objects this state uses to null to help garbage collection.
-	 */
 	override public function destroy():Void
 	{
 		super.destroy();
 	}
 
-	/**
-	 * Function that is called once every frame.
-	 */
 	override public function update():Void
 	{
 		super.update();
+		//DEBUG
+		if (FlxG.keys.justPressed.G)
+			napeDebugEnabled = !napeDebugEnabled;
+		if (FlxG.keys.justPressed.Q)
+			FlxG.resetState();
+		//
+
+		//CONTROL//
+		if (FlxG.keys.pressed.R)
+		{
+			rocky.moveLeftUpper();
+			FlxG.log.add("R");
+		}
+		if (FlxG.keys.pressed.O)
+		{
+			rocky.moveRightUpper();
+			FlxG.log.add("O");
+		}
+		if (FlxG.keys.pressed.C)
+		{
+			rocky.moveLeftLower();
+			FlxG.log.add("C");
+		}
+		if (FlxG.keys.pressed.K)
+		{
+			rocky.moveRightLower();
+			FlxG.log.add("K");
+		}
+
+		/*/WIN CONDITIONS ONLY
+		if (FlxG.keys.justPressed.Y)
+			FlxG.resetState();
+		/*/
+
+		//NEED MOBILE CONTROL CONDITIONALS
 	}
 }
 
@@ -103,10 +125,7 @@ class Ragdoll extends FlxGroup
 
 	public var llegSize:FlxPoint;
 	public var ulegSize:FlxPoint;
-	public var cameraPoleSize:FlxPoint;//can the camera stand just be another on top?
-
-	//public var neckHeight:Float; // not sure if need this
-	//public var headRadius:Float; // not sure if need this
+	public var cameraPoleSize:FlxPoint;
 
 	public var limbOffset:Float;
 	public var torsoOffset:Float;
@@ -144,33 +163,15 @@ class Ragdoll extends FlxGroup
 		sprites = new Array<FlxNapeSprite>();
 
 		cameraPole = new FlxNapeSprite(startX, startY); sprites.push(cameraPole);
-
-		//uTorso = new FlxNapeSprite(startX, startY); sprites.push(uTorso);
-		//lTorso = new FlxNapeSprite(startX, startY + 30); sprites.push(lTorso);
-
 		rULeg = new FlxNapeSprite(startX, startY + 60); sprites.push(rULeg);
 		rLLeg = new FlxNapeSprite(startX, startY + 110); sprites.push(rLLeg);
 		lULeg = new FlxNapeSprite(startX, startY + 60); sprites.push(lULeg);
 		lLLeg = new FlxNapeSprite(startX, startY + 110); sprites.push(lLLeg);
 
-		/*rUArm = new FlxNapeSprite(startX + 20, startY); sprites.push(rUArm);
-		rLArm = new FlxNapeSprite(startX + 20, startY); sprites.push(rLArm);
-		lUArm = new FlxNapeSprite(startX - 20, startY); sprites.push(lUArm);
-		lLArm = new FlxNapeSprite(startX - 20, startY); sprites.push(lLArm);*/
-
-		//head = new FlxNapeSprite(startX, startY - 40); sprites.push(head);
-
 		add(rLLeg);
 		add(lLLeg);
 		add(rULeg);
 		add(lULeg);
-		/*add(rLArm);
-		add(lLArm);
-		add(rUArm);
-		add(lUArm);
-		add(lTorso);
-		add(uTorso);
-		add(head);*/
 		add(cameraPole);
 
 		createBodies();
@@ -198,56 +199,10 @@ class Ragdoll extends FlxGroup
 		lLLeg.createRectangularBody(llegSize.x, llegSize.y);
 
 		cameraPole.createRectangularBody(cameraPoleSize.x, cameraPoleSize.y);
-
-		/*lUArm.createRectangularBody(uarmSize.x, uarmSize.y);
-		lLArm.createRectangularBody(larmSize.x, larmSize.y);
-
-		rUArm.createRectangularBody(uarmSize.x, uarmSize.y);
-		rLArm.createRectangularBody(larmSize.x, larmSize.y);
-
-		uTorso.createRectangularBody(uTorsoSize.x, uTorsoSize.y);
-		lTorso.createRectangularBody(lTorsoSize.x, lTorsoSize.y);
-
-		head.createCircularBody(headRadius);*/
 	}
 
 	function createContactListeners()
 	{
-		/*
-		// group 1 - lower left leg ignores upper left leg
-		// group 2 - lower right leg ignores upper right leg
-		// group 3 - upper left legs ignores lower torso
-		// group 4 - upper rigth legs ignores lower torso
-		// group 5 - lower torso
-		// group 6 - upper torso ignores upper arms
-		// group 7 - upper arms ignores lower arms | upper torso | lower torso
-		// group 8 - lower arms
-
-		var group1:CbType = new CbType();
-		var group2:CbType = new CbType();
-		var group3:CbType = new CbType();
-		var group4:CbType = new CbType();
-		var group5:CbType = new CbType();
-		var group6:CbType = new CbType();
-		var group7:CbType = new CbType();
-		var group8:CbType = new CbType();
-		var group9:CbType = new CbType();
-		var group10:CbType = new CbType();
-
-		lTorso.body.cbTypes.add(group5);
-		uTorso.body.cbTypes.add(group6);
-		lUArm.body.cbTypes.add(group7);
-		rUArm.body.cbTypes.add(group7);
-		lLArm.body.cbTypes.add(group8);
-		rLArm.body.cbTypes.add(group8);
-		head.body.cbTypes.add(group9);*/
-
-		// leftUpperLeg
-		// leftLowerLeg
-		// rightUpperLeg
-		// rightLowerLeg
-		// theCameraPole
-
 		var leftUpperLeg:CbType = new CbType();
 		var leftLowerLeg:CbType = new CbType();
 		var rightUpperLeg:CbType = new CbType();
@@ -259,9 +214,6 @@ class Ragdoll extends FlxGroup
 		lULeg.body.cbTypes.add(rightUpperLeg);
 		rULeg.body.cbTypes.add(rightLowerLeg);
 		cameraPole.body.cbTypes.add(theCameraPole);
-
-
-
 
 		var listener;
 		//x ignores y
@@ -277,7 +229,6 @@ class Ragdoll extends FlxGroup
 		listener.space = FlxNapeState.space;
 		listener = new PreListener(InteractionType.COLLISION, leftLowerLeg, rightLowerLeg, ignoreCollision, 0, true);
 		listener.space = FlxNapeState.space;
-
 	}
 
 	function ignoreCollision(cb:PreCallback):PreFlag {
@@ -297,6 +248,7 @@ class Ragdoll extends FlxGroup
 	function createJoints()
 	{
 		var constrain:PivotJoint;
+		var angleJoint:AngleJoint;
 		var weldJoint:WeldJoint;
 
 		// lower legs with upper legs.
@@ -306,15 +258,43 @@ class Ragdoll extends FlxGroup
 		constrain = new PivotJoint(rLLeg.body, rULeg.body, new Vec2(0, -llegSize.y / 2 + 3), new Vec2(0, ulegSize.y / 2 - 3));
 		constrain.space = FlxNapeState.space;
 
+		/*angleJoint = new AngleJoint(lLLeg.body, lULeg.body, 0, -Math.PI*.4);
+		angleJoint.space = FlxNapeState.space;
+		angleJoint = new AngleJoint(rLLeg.body, rULeg.body, 0, -Math.PI*.4);
+		angleJoint.space = FlxNapeState.space;*/
+
 		// Upper legs with each other
-		constrain = new PivotJoint(lULeg.body, rULeg.body, new Vec2(0, ulegSize.y / 2 + 3), new Vec2(0, ulegSize.y / 2 + 3));
+		constrain = new PivotJoint(lULeg.body, rULeg.body, new Vec2(0, -ulegSize.y / 2 + 3), new Vec2(0, -ulegSize.y / 2 + 3));
 		constrain.space = FlxNapeState.space;
 
-		// Camera Pole with legs
-		constrain = new PivotJoint(cameraPole.body, rULeg.body, new Vec2(0, -cameraPoleSize.y / 2 + 3), new Vec2(0, ulegSize.y / 2 + 3));
-		constrain.space = FlxNapeState.space;
+		/*/ Camera Pole with legs
+		constrain = new PivotJoint(cameraPole.body, rULeg.body, new Vec2(0, cameraPoleSize.y / 2 + 3), new Vec2(0, -ulegSize.y / 2 + 3));
+		constrain.space = FlxNapeState.space;*/
 
-		//NEED TO MAKE PELVIC BONE THAT ACTS AS UNISON OF ALL PARTS SO CAMERA ISN'T JUST ATTACHED TO A LEG
+		weldJoint = new WeldJoint(cameraPole.body, rULeg.body, new Vec2(0, cameraPoleSize.y / 2 + 3), new Vec2(0, -ulegSize.y / 2 + 3), 0);
+		weldJoint.space = FlxNapeState.space;
 
+		//NEED TO MAKE PELVIC BONE THAT ACTS AS UNISON OF ALL PARTS SO CAMERA ISN'T JUST ATTACHED TO A LEG???
+
+	}
+
+	public function moveLeftUpper()
+	{
+		lULeg.body.rotate += Math.PI*3;
+	}
+
+	public function moveRightUpper()
+	{
+		rULeg.body.rotate += Math.PI*3;
+	}
+
+	public function moveLeftLower()
+	{
+		lLLeg.body.rotate += Math.PI*3;
+	}
+
+	public function moveRightLower()
+	{
+		rLLeg.body.rotate += Math.PI*3;
 	}
 }
