@@ -57,9 +57,9 @@ class PlayState extends FlxNapeState
 								"assets/GokuULeg.png",
 								"assets/GokuLLeg.png"); */
 		rocky.createGraphics(
-								"assets/GokuULeg.png",
-								"assets/GokuLLeg.png",
-								"assets/CameraPole.png"
+								"assets/images/GokuULeg.png",
+								"assets/images/GokuLLeg.png",
+								"assets/images/CameraPole.png"
 								);
 		add(rocky);
 	}
